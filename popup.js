@@ -1,11 +1,263 @@
 const app = document.getElementById("app");
 
+// ---- Persistencia de sesión / consentimiento ----
+const STORAGE_KEYS = {
+  loggedIn: "colsubsidio_logged_in",
+  termsAccepted: "colsubsidio_terms_accepted",
+  userName: "colsubsidio_user_name",
+};
+
+function safeGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn("[v0] No se pudo leer localStorage:", error);
+    return null;
+  }
+}
+
+function safeSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn("[v0] No se pudo escribir en localStorage:", error);
+  }
+}
+
+function isLoggedIn() {
+  return safeGet(STORAGE_KEYS.loggedIn) === "true";
+}
+
+function hasAcceptedTerms() {
+  return safeGet(STORAGE_KEYS.termsAccepted) === "true";
+}
+
+function getUserName() {
+  return safeGet(STORAGE_KEYS.userName) || "";
+}
+
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value;
+  return div.innerHTML;
+}
+
+// Decide qué pantalla mostrar según el estado guardado.
+function startFlow() {
+  if (!isLoggedIn()) {
+    renderLoginScreen();
+    return;
+  }
+  if (!hasAcceptedTerms()) {
+    renderTermsScreen();
+    return;
+  }
+  renderIdleScreen();
+}
+
+function renderLoginScreen() {
+  app.innerHTML = `
+    <div class="screen auth">
+      <div class="logo-wrap">
+        <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
+      </div>
+
+      <h1 class="auth-title">Bienvenido a Colsubsidio Virtual</h1>
+
+      <div class="auth-intro">
+        <span class="intro-icon">
+          <svg viewBox="0 0 24 24"><path d="m3 11 15-7v16l-6-2.8"/><path d="M3 11v4a2 2 0 0 0 2 2h1.5"/><path d="M7 17v3a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2"/></svg>
+        </span>
+        <p>Para mejorar la experiencia y proteger tus datos ahora debes crear tu cuenta, si ya tienes una inicia sesi&oacute;n.</p>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input
+            id="nombre"
+            class="input"
+            type="text"
+            autocomplete="name"
+            placeholder="Nombre completo"
+          />
+        </div>
+
+        <div class="field">
+          <label for="doc-type">Tipo de documento</label>
+          <select id="doc-type" class="select">
+            <option value="CC" selected>C&eacute;dula de Ciudadan&iacute;a</option>
+            <option value="CE">C&eacute;dula de Extranjer&iacute;a</option>
+            <option value="TI">Tarjeta de Identidad</option>
+            <option value="PA">Pasaporte</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="cedula">N&uacute;mero de documento</label>
+          <input
+            id="cedula"
+            class="input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="N&uacute;mero de documento"
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Contrase&ntilde;a</label>
+          <div class="password-wrap">
+            <input
+              id="password"
+              class="input"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Contrase&ntilde;a"
+            />
+            <button type="button" id="toggle-pass" class="toggle-pass" aria-label="Mostrar contrase&ntilde;a">
+              <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="field-error" id="login-error" role="alert"></div>
+
+        <div class="actions">
+          <button type="submit">&rsaquo; Ingresar</button>
+        </div>
+
+        <div class="auth-links">
+          <button type="button" class="link">&iquest;Olvidaste tu contrase&ntilde;a?</button>
+          <span class="signup">&iquest;No tienes una cuenta? <button type="button" class="link accent">Crea una cuenta</button></span>
+        </div>
+      </form>
+    </div>
+  `;
+
+  const form = document.getElementById("login-form");
+  const nombre = document.getElementById("nombre");
+  const cedula = document.getElementById("cedula");
+  const password = document.getElementById("password");
+  const errorEl = document.getElementById("login-error");
+  const toggle = document.getElementById("toggle-pass");
+
+  nombre.addEventListener("input", () => {
+    if (errorEl.textContent) errorEl.textContent = "";
+  });
+
+  // La cédula solo admite enteros: se eliminan caracteres no numéricos al escribir.
+  cedula.addEventListener("input", () => {
+    const cleaned = cedula.value.replace(/\D/g, "");
+    if (cleaned !== cedula.value) {
+      cedula.value = cleaned;
+    }
+    if (errorEl.textContent) errorEl.textContent = "";
+  });
+
+  toggle.addEventListener("click", () => {
+    const willShow = password.type === "password";
+    password.type = willShow ? "text" : "password";
+    toggle.setAttribute("aria-label", willShow ? "Ocultar contrase\u00f1a" : "Mostrar contrase\u00f1a");
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = nombre.value.trim();
+    const doc = cedula.value.trim();
+    const pass = password.value;
+
+    if (!name) {
+      errorEl.textContent = "Ingresa tu nombre.";
+      nombre.focus();
+      return;
+    }
+    if (!doc) {
+      errorEl.textContent = "Ingresa tu n\u00famero de documento.";
+      cedula.focus();
+      return;
+    }
+    if (!/^\d+$/.test(doc)) {
+      errorEl.textContent = "La c\u00e9dula solo puede contener n\u00fameros.";
+      cedula.focus();
+      return;
+    }
+    if (!pass) {
+      errorEl.textContent = "Ingresa tu contrase\u00f1a.";
+      password.focus();
+      return;
+    }
+
+    // Login simulado: cualquier contraseña es válida.
+    errorEl.textContent = "";
+    safeSet(STORAGE_KEYS.loggedIn, "true");
+    safeSet(STORAGE_KEYS.userName, name);
+    startFlow();
+  });
+}
+
+function renderTermsScreen() {
+  app.innerHTML = `
+    <div class="screen terms">
+      <div class="logo-wrap">
+        <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
+      </div>
+
+      <h1 class="terms-title">T&eacute;rminos y condiciones</h1>
+      <p class="terms-sub">Antes de continuar, revisa y acepta nuestros t&eacute;rminos de uso y pol&iacute;tica de tratamiento de datos.</p>
+
+      <div class="terms-box" tabindex="0">
+        <h3>1. Aceptaci&oacute;n</h3>
+        <p>Al utilizar Colsubsidio Virtual aceptas los presentes t&eacute;rminos y condiciones, as&iacute; como las pol&iacute;ticas asociadas al uso de la plataforma y sus servicios.</p>
+
+        <h3>2. Tratamiento de datos personales</h3>
+        <p>Autorizas el tratamiento de tus datos personales conforme a la Ley 1581 de 2012 y dem&aacute;s normas aplicables, con la finalidad de ofrecerte productos, beneficios y una experiencia personalizada.</p>
+
+        <h3>3. Uso de la plataforma</h3>
+        <p>Te comprometes a utilizar la plataforma de manera responsable, proporcionando informaci&oacute;n veraz y actualizada. El uso indebido podr&aacute; conllevar la suspensi&oacute;n del servicio.</p>
+
+        <h3>4. Ofertas y financiaci&oacute;n</h3>
+        <p>Las ofertas, cupos de cr&eacute;dito y beneficios mostrados son informativos y est&aacute;n sujetos a estudio, aprobaci&oacute;n y disponibilidad. No constituyen una oferta comercial vinculante.</p>
+
+        <h3>5. Seguridad</h3>
+        <p>Nos comprometemos a proteger tu informaci&oacute;n mediante medidas t&eacute;cnicas y organizativas. T&uacute; eres responsable de mantener la confidencialidad de tus credenciales de acceso.</p>
+
+        <h3>6. Cambios</h3>
+        <p>Podemos actualizar estos t&eacute;rminos en cualquier momento. Te notificaremos los cambios relevantes a trav&eacute;s de los canales oficiales.</p>
+      </div>
+
+      <label class="terms-check" for="terms-accept">
+        <input type="checkbox" id="terms-accept" />
+        <span class="checkbox"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span>He le&iacute;do y acepto los t&eacute;rminos y condiciones</span>
+      </label>
+
+      <div class="actions">
+        <button type="button" id="accept-terms" disabled>Aceptar y continuar</button>
+      </div>
+    </div>
+  `;
+
+  const check = document.getElementById("terms-accept");
+  const acceptBtn = document.getElementById("accept-terms");
+
+  check.addEventListener("change", () => {
+    acceptBtn.disabled = !check.checked;
+  });
+
+  acceptBtn.addEventListener("click", () => {
+    if (!check.checked) return;
+    safeSet(STORAGE_KEYS.termsAccepted, "true");
+    startFlow();
+  });
+}
+
 function renderIdleScreen() {
   app.innerHTML = `
     <div class="screen screen-compact">
       <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
       <h1 class="title">Smart Cashback Modo Desarrollador</h1>
-      <p class="subtitle">Visualizacion del algoritmo de hiperpersonalizacion</p>
+      <p class="subtitle">Visualizacion del algoritmo de Hyper-personalizaci&oacute;n</p>
       <div class="divider"></div>
       <button id="draw-lines">Iniciar simulaci&oacute;n</button>
     </div>
@@ -30,13 +282,17 @@ function renderLoadingScreen() {
 }
 
 function renderCompleteScreen() {
+  const name = getUserName();
+  const firstName = name.split(/\s+/)[0] || "";
+  const greeting = firstName ? `, ${escapeHtml(firstName)}` : "";
+
   app.innerHTML = `
     <div class="screen opportunity">
       <div class="logo-wrap">
         <img class="logo logo-sm" src="LogoV1.png" alt="Colsubsidio" />
       </div>
 
-      <h1 class="opportunity-title">Encontramos una oportunidad para ti</h1>
+      <h1 class="opportunity-title">Encontramos una oportunidad para ti${greeting}!</h1>
 
       <div class="product-summary">
         <img class="product-thumb" src="https://http2.mlstatic.com/D_NQ_NP_2X_791332-MLA109640286585_032026-F.webp" alt="Bicicleta Rockrider MTB" />
@@ -206,7 +462,7 @@ async function drawImportantLines() {
         "Llamada telefónica",
         "SMS",
         "Correo electrónico",
-        "Notificación push de la app móvil",
+        "Notificación app móvil",
         "Mensaje dentro de la app",
         "Notificación del portal web",
         "Cita en sucursal física",
@@ -215,13 +471,13 @@ async function drawImportantLines() {
         "Chatbot",
         "Chat en vivo",
         "Facebook Messenger",
-        "Mensaje directo de Instagram",
-        "Mensajería empresarial RCS",
+        "Instagram",
+        "Mensajería empresarial",
         "Correo directo",
-        "Comunicación de RRHH del empleador",
+        "Comunicación de RRHH",
         "Centro de contacto",
-        "Respuesta de voz interactiva (IVR)",
-        "Evento presencial / Feria financiera",
+        "Respuesta de voz interactiva",
+        "Evento presencial",
       ];
 
       const randomFrom = (list) => list[Math.floor(Math.random() * list.length)];
@@ -348,7 +604,7 @@ async function drawImportantLines() {
       document.documentElement.appendChild(overlay);
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      const infoRepresentationDuration = 1100;
+      const infoRepresentationDuration = 100;
       const startX = Math.max(0, window.innerWidth - 300);
       const startY = 10;
 
@@ -747,4 +1003,4 @@ app.addEventListener("click", async (event) => {
   }
 });
 
-renderIdleScreen();
+startFlow();
