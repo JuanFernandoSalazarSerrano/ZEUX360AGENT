@@ -1,16 +1,187 @@
-const button = document.getElementById("draw-lines");
-const statusEl = document.getElementById("status");
+const app = document.getElementById("app");
+
+function renderIdleScreen() {
+  app.innerHTML = `
+    <div class="screen screen-compact">
+      <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
+      <h1 class="title">Smart Cashback</h1>
+      <p class="subtitle">Descubre oportunidades financieras personalizadas para ti.</p>
+      <div class="divider"></div>
+      <button id="draw-lines">Iniciar simulaci&oacute;n</button>
+    </div>
+  `;
+}
+
+function renderLoadingScreen() {
+  app.innerHTML = `
+    <div class="screen">
+      <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
+      <h1 class="title">Procesando</h1>
+      <p class="subtitle">Preparando tu simulaci&oacute;n personalizada.</p>
+      <div class="divider"></div>
+      <div class="spacer"></div>
+      <div class="status" style="margin-bottom: 16px;">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="status">Un momento, por favor...</span>
+      </div>
+      <button disabled>Procesando...</button>
+    </div>
+  `;
+}
+
+function renderCompleteScreen() {
+  app.innerHTML = `
+    <div class="screen opportunity">
+      <div class="logo-wrap">
+        <img class="logo logo-sm" src="LogoV1.png" alt="Colsubsidio" />
+      </div>
+
+      <h1 class="opportunity-title">Encontramos una oportunidad para ti</h1>
+
+      <div class="product-summary">
+        <img class="product-thumb" src="https://http2.mlstatic.com/D_NQ_NP_2X_791332-MLA109640286585_032026-F.webp" alt="Bicicleta Rockrider MTB" />
+        <div class="product-info">
+          <div class="product-name">Bicicleta Mtb Gw Aluminio Scorpion Shimano 7 Montaña Color Gris Tamaño Del Marco 17&quot;</div>
+          <div class="product-price">COP 789.900</div>
+          <span class="product-tag">Deporte y recreaci&oacute;n</span>
+        </div>
+      </div>
+
+      <div class="confidence">
+        <span>Nivel de confianza</span>
+        <div class="confidence-track"><div class="confidence-fill"></div></div>
+        <strong>98%</strong>
+      </div>
+
+      <div class="financing-label">Financiaci&oacute;n recomendada</div>
+      <div class="financing-title">Cr&eacute;dito de consumo</div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <span>Cuota mensual</span>
+          <strong>COP 71.667</strong>
+        </div>
+        <div class="stat">
+          <span>Tasa de inter&eacute;s</span>
+          <strong>Personalizada</strong>
+        </div>
+        <div class="stat accent">
+          <span>Cashback</span>
+          <strong>5% &middot; COP 115.000</strong>
+        </div>
+        <div class="stat">
+          <span>Aprobaci&oacute;n</span>
+          <strong>Muy alta</strong>
+        </div>
+      </div>
+
+      <div class="section-label">&iquest;Por qu&eacute; ves esta oferta?</div>
+      <div class="reason-list">
+        <div class="reason">
+          <span class="reason-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
+          <span>Participas frecuentemente en programas de recreaci&oacute;n</span>
+        </div>
+        <div class="reason">
+          <span class="reason-icon"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>Excelente historial de pagos</span>
+        </div>
+        <div class="reason">
+          <span class="reason-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Calificas para este cr&eacute;dito</span>
+        </div>
+        <div class="reason">
+          <span class="reason-icon"><svg viewBox="0 0 24 24"><path d="M20.8 8.6a5.5 5.5 0 0 0-8.8-1.5 5.5 5.5 0 0 0-8.8 1.5c-1.5 3.5 1.2 7 8.8 12.4 7.6-5.4 10.3-8.9 8.8-12.4z"/></svg></span>
+          <span>Coincide con tus intereses</span>
+        </div>
+        <div class="reason urgent">
+          <span class="reason-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
+          <span>La oferta expira en <strong>48 horas</strong></span>
+        </div>
+      </div>
+
+      <div class="section-label">Otros beneficios disponibles</div>
+      <div class="benefit-grid">
+        <div class="benefit">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M8.2 12.5 7 21l5-3 5 3-1.2-8.5"/></svg>
+          <strong>Puntos de recreaci&oacute;n</strong>
+          <span>Usa 1.240 pts</span>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <strong>Seguro deportivo</strong>
+          <span>15% dcto</span>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24"><path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18v3h3l5.3-5.3a5 5 0 0 0 6.4-6.4L14 13l-3-3 3.7-3.7z"/></svg>
+          <strong>Mantenimiento de bici</strong>
+          <span>Cup&oacute;n gratis</span>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          <strong>Descuento en casco</strong>
+          <span>20% dcto</span>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          <strong>Protecci&oacute;n de pagos</strong>
+          <span>Primer mes</span>
+        </div>
+        <div class="benefit">
+          <svg viewBox="0 0 24 24"><path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/></svg>
+          <strong>Impulso de lealtad</strong>
+          <span>+2&times; puntos</span>
+        </div>
+      </div>
+
+      <div class="section-label">Para ti <span class="meta">IA curada &middot; Cliente 360</span></div>
+      <div class="foryou-card">
+        <div class="foryou-hero">
+          <span class="foryou-hero-icon"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
+          <span class="foryou-hero-tag">Vivienda</span>
+        </div>
+        <div class="foryou-body">
+          <h2 class="foryou-title">Nuevo subsidio de vivienda</h2>
+          <p class="foryou-desc">Seg&uacute;n tu perfil financiero, podr&iacute;as calificar para un subsidio de vivienda Colsubsidio.</p>
+          <div class="foryou-actions">
+            <button class="btn-primary">Conocer m&aacute;s</button>
+            <button class="btn-save">Guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button>Aplicar en 30 segundos</button>
+        <button class="button-ghost">Quiz&aacute;s despu&eacute;s</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderErrorScreen(message) {
+  app.innerHTML = `
+    <div class="screen">
+      <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
+      <h1 class="title">Algo sali&oacute; mal</h1>
+      <p class="subtitle" id="status">${message}</p>
+      <div class="divider"></div>
+      <div class="spacer"></div>
+      <button id="draw-lines">Volver a intentar</button>
+    </div>
+  `;
+}
 
 function setStatus(message) {
-  statusEl.textContent = message;
+  const statusEl = document.getElementById("status");
+  if (statusEl) {
+    statusEl.textContent = message;
+  }
 }
 
 async function drawImportantLines() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab?.id) {
-    setStatus("No se encontró una pestaña activa.");
-    return;
+    throw new Error("No se encontró una pestaña activa.");
   }
 
   await chrome.scripting.executeScript({
@@ -149,10 +320,12 @@ async function drawImportantLines() {
         if (seen.has(element)) continue;
         seen.add(element);
         unique.push(element);
-        if (unique.length >= 20) break;
+        if (unique.length >= 40) break;
       }
 
-      if (unique.length === 0) return;
+      if (unique.length === 0) {
+        throw new Error("No fue posible iniciar la simulación en esta página.");
+      }
 
       const svgNS = "http://www.w3.org/2000/svg";
       const overlay = document.createElement("div");
@@ -174,6 +347,7 @@ async function drawImportantLines() {
       document.documentElement.appendChild(overlay);
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const infoRepresentationDuration = 200;
       const startX = Math.max(0, window.innerWidth - 300);
       const startY = 10;
 
@@ -286,8 +460,9 @@ async function drawImportantLines() {
         const endX = Math.max(0, Math.min(window.innerWidth, rect.left + rect.width / 2));
         const endY = Math.max(0, Math.min(window.innerHeight, rect.top + rect.height / 2));
         const label = extractLabel(element).toUpperCase();
-        const midX = (startX + endX) / 2;
-        const midY = (startY + endY) / 2;
+        // Anchor labels at 85% of the line (15% away from the end point)
+        const midX = startX + (endX - startX) * 0.85;
+        const midY = startY + (endY - startY) * 0.85;
 
         const reticle = document.createElementNS(svgNS, "rect");
         const rw = Math.max(rect.width, 24);
@@ -318,13 +493,13 @@ async function drawImportantLines() {
         leadDot.setAttribute("cx", String(endX));
         leadDot.setAttribute("cy", String(endY));
         leadDot.setAttribute("r", "3.8");
-        leadDot.setAttribute("fill", "#FFFFFF");
+        leadDot.setAttribute("fill", "#FFD000");
         leadDot.setAttribute("filter", "url(#optin-line-glow)");
         leadDot.setAttribute("opacity", "0");
         leadDot.style.transition = "opacity 140ms ease-out";
 
         const flowDots = [];
-        const flowDotCount = Math.floor(Math.random() * 6);
+        const flowDotCount = Math.floor(Math.random() * 7);
 
         for (let dotIndex = 0; dotIndex < flowDotCount; dotIndex += 1) {
           const flowDot = document.createElementNS(svgNS, "circle");
@@ -499,7 +674,7 @@ async function drawImportantLines() {
 
           flowDots.forEach((flowDot, dotIndex) => {
             const delay = dotIndex * 120;
-            const duration = 1150;
+            const duration = infoRepresentationDuration;
             const baseRadius = Number(flowDot.getAttribute("r")) || 2;
             const startTime = performance.now() + delay;
 
@@ -527,7 +702,7 @@ async function drawImportantLines() {
           });
         });
 
-        await sleep(1000);
+        await sleep(infoRepresentationDuration);
         line.style.opacity = "0";
         leadDot.style.opacity = "0";
         flowDots.forEach((flowDot) => flowDot.setAttribute("opacity", "0"));
@@ -550,13 +725,25 @@ async function drawImportantLines() {
     },
   });
 
-  setStatus("Líneas dibujadas en la página.");
+  setStatus("Simulación completada.");
 }
 
-button.addEventListener("click", () => {
-  setStatus("Dibujando elementos importantes...");
-  drawImportantLines().catch((error) => {
+app.addEventListener("click", async (event) => {
+  const button = event.target.closest("#draw-lines");
+  if (!button || button.disabled) {
+    return;
+  }
+
+  renderLoadingScreen();
+  await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
+  try {
+    await drawImportantLines();
+    renderCompleteScreen();
+  } catch (error) {
     console.error(error);
-    setStatus("No se pudieron dibujar las líneas en esta página.");
-  });
+    renderErrorScreen(error instanceof Error ? error.message : "No se pudo completar la simulación.");
+  }
 });
+
+renderIdleScreen();

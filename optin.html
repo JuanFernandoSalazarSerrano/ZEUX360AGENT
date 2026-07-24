@@ -1,45 +1,524 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      body {
-        margin: 0;
-        width: 240px;
-        font-family: Arial, sans-serif;
-        background: #101828;
-        color: #f8fafc;
+      :root {
+        --azul: #0067b1;
+        --azul-deep: #00538f;
+        --amarillo: #ffd000;
+        --grafito: #575756;
+        --white: #ffffff;
+        --white-70: rgba(255, 255, 255, 0.7);
+        --white-40: rgba(255, 255, 255, 0.4);
+        --white-15: rgba(255, 255, 255, 0.15);
       }
 
-      .wrap {
-        padding: 16px;
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 340px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--white);
+        background: var(--azul);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #app {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .screen {
+        min-height: 288px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 28px 20px;
+        text-align: center;
+      }
+
+      /* Compact variant for the idle ("Iniciar simulación") phase: 40% shorter */
+      .screen-compact {
+        min-height: 173px;
+        padding: 10px 28px 14px;
+      }
+
+      .screen-compact .logo {
+        margin-bottom: 6px;
+      }
+
+      .screen-compact .title {
+        margin-bottom: 4px;
+      }
+
+      .screen-compact .divider {
+        margin: 8px 0;
+      }
+
+      .logo {
+        width: 172px;
+        height: 172px;
+        object-fit: contain;
+        margin-bottom: 16px;
+      }
+
+      .logo-sm {
+        width: 109px;
+        height: 109px;
+        margin-bottom: 12px;
+      }
+
+      .title {
+        margin: 0 0 8px;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--white-70);
+        max-width: 240px;
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .divider {
+        width: 32px;
+        height: 3px;
+        border-radius: 2px;
+        background: var(--amarillo);
+        margin: 12px 0;
       }
 
       button {
         width: 100%;
         border: 0;
-        border-radius: 12px;
-        padding: 12px 14px;
+        border-radius: 999px;
+        padding: 14px 20px;
         font-size: 14px;
         font-weight: 700;
         cursor: pointer;
-        color: #101828;
-        background: linear-gradient(135deg, #fbbf24, #fb7185);
+        color: var(--azul-deep);
+        background: var(--amarillo);
+        transition: transform 120ms ease, opacity 120ms ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        cursor: progress;
+        opacity: 0.7;
+        transform: none;
+      }
+
+      .button-ghost {
+        background: transparent;
+        color: var(--white-70);
+        border: 1px solid var(--white-40);
+        margin-top: 10px;
       }
 
       .status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--white-70);
+        min-height: 20px;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        border: 2px solid var(--white-15);
+        border-top-color: var(--amarillo);
+        animation: spin 0.85s linear infinite;
+        flex: 0 0 auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ---- Opportunity screen ---- */
+      .opportunity {
+        text-align: left;
+        align-items: stretch;
+        padding: 16px 24px 18px;
+      }
+
+      .opportunity .logo-wrap {
+        display: flex;
+        justify-content: center;
+      }
+
+      .opportunity-title {
+        margin: 0 0 10px;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        text-align: center;
+      }
+
+      /* Product summary: thumbnail + name + price */
+      .product-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--white-15);
+      }
+
+      .product-thumb {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 10px;
+        flex: 0 0 auto;
+        background: var(--white);
+      }
+
+      .product-info {
+        min-width: 0;
+      }
+
+      .product-name {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .product-price {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--white);
+        margin-top: 1px;
+      }
+
+      .product-tag {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--white-70);
+        border: 1px solid var(--white-15);
+      }
+
+      /* Confidence meter */
+      .confidence {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--white-70);
+      }
+
+      .confidence-track {
+        flex: 1;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--white-15);
+        overflow: hidden;
+      }
+
+      .confidence-fill {
+        height: 100%;
+        width: 98%;
+        border-radius: 999px;
+        background: var(--amarillo);
+      }
+
+      .confidence strong {
+        color: var(--amarillo);
+        font-weight: 700;
+      }
+
+      /* Financing section */
+      .financing-label {
         margin-top: 12px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--amarillo);
+      }
+
+      .financing-title {
+        margin: 2px 0 8px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .stat {
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--white-15);
+      }
+
+      .stat span {
+        display: block;
+        font-size: 10px;
+        color: var(--white-70);
+        margin-bottom: 2px;
+      }
+
+      .stat strong {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--white);
+      }
+
+      .stat.accent {
+        background: rgba(255, 208, 0, 0.12);
+        border-color: rgba(255, 208, 0, 0.35);
+      }
+
+      .stat.accent strong {
+        color: var(--amarillo);
+      }
+
+      /* ---- Section labels (reused) ---- */
+      .section-label {
+        margin-top: 14px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--amarillo);
+      }
+
+      .section-label .meta {
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: none;
+        color: var(--white-40);
+      }
+
+      /* ---- "Why are you seeing this" reasons ---- */
+      .reason-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .reason {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--white-15);
+        font-size: 11.5px;
+        color: var(--white);
+      }
+
+      .reason-icon {
+        flex: 0 0 auto;
+        width: 24px;
+        height: 24px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 208, 0, 0.14);
+      }
+
+      .reason-icon svg {
+        width: 13px;
+        height: 13px;
+        stroke: var(--amarillo);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .reason.urgent {
+        background: rgba(255, 208, 0, 0.12);
+        border-color: rgba(255, 208, 0, 0.35);
+      }
+
+      .reason.urgent strong {
+        color: var(--amarillo);
+      }
+
+      /* ---- Benefits grid ---- */
+      .benefit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .benefit {
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--white-15);
+      }
+
+      .benefit svg {
+        width: 14px;
+        height: 14px;
+        stroke: var(--amarillo);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .benefit strong {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--white);
+        line-height: 1.25;
+      }
+
+      .benefit span {
+        display: block;
+        font-size: 10px;
+        color: var(--white-70);
+        margin-top: 1px;
+      }
+
+      /* ---- "Para ti" AI-curated card ---- */
+      .foryou-card {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--white-15);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .foryou-hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 12px;
+        background: var(--amarillo);
+      }
+
+      .foryou-hero-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 83, 143, 0.15);
+      }
+
+      .foryou-hero-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: var(--azul-deep);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .foryou-hero-tag {
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--azul-deep);
+        background: rgba(255, 255, 255, 0.55);
+      }
+
+      .foryou-body {
+        padding: 10px 12px 12px;
+      }
+
+      .foryou-title {
+        margin: 0 0 3px;
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      .foryou-desc {
+        margin: 0 0 10px;
+        font-size: 11px;
+        line-height: 1.45;
+        color: var(--white-70);
+      }
+
+      .foryou-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .foryou-actions .btn-primary {
+        flex: 1;
+        padding: 9px 14px;
         font-size: 12px;
-        line-height: 1.4;
-        color: #cbd5e1;
-        min-height: 18px;
+      }
+
+      .foryou-actions .btn-save {
+        flex: 0 0 auto;
+        width: auto;
+        padding: 9px 14px;
+        font-size: 12px;
+        background: transparent;
+        color: var(--white-70);
+        border: 1px solid var(--white-40);
+      }
+
+      .opportunity .actions {
+        margin-top: 12px;
       }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <button id="draw-lines">Draw important lines</button>
-      <div id="status" class="status">Select a tab and click to draw lines.</div>
-    </div>
+    <div id="app"></div>
     <script src="popup.js"></script>
   </body>
 </html>
