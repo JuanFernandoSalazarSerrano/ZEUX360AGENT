@@ -33,7 +33,7 @@ function renderCompleteScreen() {
   app.innerHTML = `
     <div class="screen opportunity">
       <div class="logo-wrap">
-        <img class="logo logo-lg" src="LogoV1.png" alt="Colsubsidio" />
+        <img class="logo logo-sm" src="LogoV1.png" alt="Colsubsidio" />
       </div>
 
       <h1 class="opportunity-title">Encontramos una oportunidad para ti</h1>
@@ -321,7 +321,7 @@ async function drawImportantLines() {
         if (seen.has(element)) continue;
         seen.add(element);
         unique.push(element);
-        if (unique.length >= 5) break;
+        if (unique.length >= 28) break;
       }
 
       if (unique.length === 0) {
@@ -348,7 +348,7 @@ async function drawImportantLines() {
       document.documentElement.appendChild(overlay);
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      const infoRepresentationDuration = 200;
+      const infoRepresentationDuration = 1100;
       const startX = Math.max(0, window.innerWidth - 300);
       const startY = 10;
 
