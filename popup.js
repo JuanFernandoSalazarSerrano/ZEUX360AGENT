@@ -4,8 +4,8 @@ function renderIdleScreen() {
   app.innerHTML = `
     <div class="screen screen-compact">
       <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
-      <h1 class="title">Smart Cashback</h1>
-      <p class="subtitle">Descubre oportunidades financieras personalizadas para ti.</p>
+      <h1 class="title">Smart Cashback Modo Desarrollador</h1>
+      <p class="subtitle">Visualizacion del algoritmo de hiperpersonalizacion</p>
       <div class="divider"></div>
       <button id="draw-lines">Iniciar simulaci&oacute;n</button>
     </div>
@@ -33,7 +33,7 @@ function renderCompleteScreen() {
   app.innerHTML = `
     <div class="screen opportunity">
       <div class="logo-wrap">
-        <img class="logo logo-sm" src="LogoV1.png" alt="Colsubsidio" />
+        <img class="logo logo-lg" src="LogoV1.png" alt="Colsubsidio" />
       </div>
 
       <h1 class="opportunity-title">Encontramos una oportunidad para ti</h1>
@@ -73,6 +73,11 @@ function renderCompleteScreen() {
           <span>Aprobaci&oacute;n</span>
           <strong>Muy alta</strong>
         </div>
+      </div>
+
+            <div class="actions">
+        <button>Aplicar en 30 segundos</button>
+        <button class="button-ghost">Quiz&aacute;s despu&eacute;s</button>
       </div>
 
       <div class="section-label">&iquest;Por qu&eacute; ves esta oferta?</div>
@@ -149,10 +154,6 @@ function renderCompleteScreen() {
         </div>
       </div>
 
-      <div class="actions">
-        <button>Aplicar en 30 segundos</button>
-        <button class="button-ghost">Quiz&aacute;s despu&eacute;s</button>
-      </div>
     </div>
   `;
 }
@@ -320,7 +321,7 @@ async function drawImportantLines() {
         if (seen.has(element)) continue;
         seen.add(element);
         unique.push(element);
-        if (unique.length >= 40) break;
+        if (unique.length >= 5) break;
       }
 
       if (unique.length === 0) {
