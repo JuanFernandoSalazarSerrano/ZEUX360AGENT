@@ -59,9 +59,24 @@
         margin: 8px 0;
       }
 
+      /* Compact variant for the loading ("Procesando") phase: tighter container only,
+         content (logo/title/subtitle/button) stays full size */
+      .screen-loading {
+        min-height: 115px;
+        padding: 14px 28px 14px;
+      }
+
+      .screen-loading .divider {
+        margin: 8px 0;
+      }
+
+      .screen-loading .status {
+        margin-bottom: 14px;
+      }
+
       .logo {
         width: 172px;
-        height: 172px;
+        height: 122px;
         object-fit: contain;
         margin-bottom: 8px;
       }
@@ -175,7 +190,7 @@
 
       .opportunity .logo {
         width: 196px;
-        height: 116px;
+        height: 86px;
         margin-bottom: 1px;
       }
 

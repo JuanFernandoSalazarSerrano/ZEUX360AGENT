@@ -1,14 +1,34 @@
 {
-  
-  "name": "optinconector",
+  "name": "Zeux360 Agent",
   "description": "conector opt-in",
   "version": "1.0",
   "manifest_version": 3,
-  "permissions": ["activeTab", "scripting"],
+
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "webNavigation"
+  ],
+
+  "host_permissions": [
+    "https://*.mercadolibre.com/*",
+    "https://*.mercadolibre.com.ar/*",
+    "https://*.mercadolibre.com.mx/*",
+    "https://*.mercadolibre.com.co/*",
+    "https://*.mercadolibre.cl/*",
+    "https://*.mercadolibre.com.pe/*",
+    "https://*.mercadolibre.com.uy/*",
+    "https://*.mercadolivre.com.br/*",
+    "http://localhost:8000/*"
+  ],
 
   "action": {
     "default_popup": "optin.html",
     "default_icon": "cols.png"
-    }
-
+  }
 }

@@ -1,5 +1,24 @@
 const app = document.getElementById("app");
 
+// Chrome sizes the popup window to fit its content on first paint, but it
+// only auto-grows afterwards — it does not shrink the window back down when
+// a later screen is shorter (e.g. idle/loading, shown right after the tall
+// "Iniciar sesión"/"Términos" screens on a first-time login). Briefly
+// collapsing <html> to 0 height and letting it re-expand on the next frame
+// forces Chrome to re-measure the popup and shrink it to the new, shorter
+// content instead of keeping the old, taller size.
+function fitPopupToContent() {
+  const root = document.documentElement;
+  root.style.height = "0px";
+  requestAnimationFrame(() => {
+    root.style.height = "";
+  });
+}
+
+new MutationObserver(() => {
+  requestAnimationFrame(fitPopupToContent);
+}).observe(app, { childList: true, subtree: true });
+
 // ---- Persistencia de sesión / consentimiento ----
 const STORAGE_KEYS = {
   loggedIn: "colsubsidio_logged_in",
@@ -259,20 +278,19 @@ function renderIdleScreen() {
       <h1 class="title">Smart Cashback Modo Desarrollador</h1>
       <p class="subtitle">Visualizacion del algoritmo de Hyper-personalizaci&oacute;n</p>
       <div class="divider"></div>
-      <button id="draw-lines">Iniciar simulaci&oacute;n</button>
+      <button id="draw-lines" style="margin-bottom: 8px;">Iniciar simulaci&oacute;n</button>
     </div>
   `;
 }
 
 function renderLoadingScreen() {
   app.innerHTML = `
-    <div class="screen">
+    <div class="screen screen-loading">
       <img class="logo" src="LogoV1.png" alt="Colsubsidio" />
       <h1 class="title">Procesando</h1>
-      <p class="subtitle">Preparando tu simulaci&oacute;n personalizada.</p>
+      <p class="subtitle">Preparando tu credito hyper-personalizado.</p>
       <div class="divider"></div>
-      <div class="spacer"></div>
-      <div class="status" style="margin-bottom: 16px;">
+      <div class="status">
         <span class="spinner" aria-hidden="true"></span>
         <span id="status">Un momento, por favor...</span>
       </div>
@@ -292,7 +310,7 @@ function renderCompleteScreen() {
         <img class="logo logo-sm" src="LogoV1.png" alt="Colsubsidio" />
       </div>
 
-      <h1 class="opportunity-title">Encontramos una oportunidad para ti${greeting}!</h1>
+      <h1 class="opportunity-title" style="margin-bottom: 18px;">Encontramos una oportunidad para ti${greeting}</h1>
 
       <div class="product-summary">
         <img class="product-thumb" src="https://http2.mlstatic.com/D_NQ_NP_2X_791332-MLA109640286585_032026-F.webp" alt="Bicicleta Rockrider MTB" />
@@ -323,7 +341,7 @@ function renderCompleteScreen() {
         </div>
         <div class="stat accent">
           <span>Cashback</span>
-          <strong>5% &middot; COP 115.000</strong>
+          <strong>5% &middot; COP 39.495</strong>
         </div>
         <div class="stat">
           <span>Aprobaci&oacute;n</span>
@@ -340,12 +358,12 @@ function renderCompleteScreen() {
       <div class="reason-list">
         <div class="reason">
           <span class="reason-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
-          <span>Participas frecuentemente en programas de recreaci&oacute;n</span>
-        </div>
+          <span>Excelente historial de pagos</span>
+          </div>
         <div class="reason">
           <span class="reason-icon"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <span>Excelente historial de pagos</span>
-        </div>
+                  <span>Participas frecuentemente en programas de recreaci&oacute;n</span>
+          </div>
         <div class="reason">
           <span class="reason-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
           <span>Calificas para este cr&eacute;dito</span>
@@ -528,6 +546,54 @@ async function drawImportantLines() {
         };
 
         let score = baseScores[tag] ?? 10;
+        const className = element.className?.toString() || "";
+        const classBoosts = [
+          ["andes-money-amount__fraction", 220],
+          ["andes-money-amount__discount", 210],
+          ["ui-pdp-price", 200],
+          ["ui-pdp-title", 190],
+          ["ui-pdp-buybox", 180],
+          ["ui-pdp-gallery", 170],
+          ["ui-pdp-seller-summary", 160],
+          ["ui-pdp-price__subtitles", 150],
+          ["shipping", 140],
+          ["delivery", 138],
+          ["review", 136],
+          ["rating", 134],
+          ["stars", 132],
+          ["specification", 128],
+          ["attribute", 126],
+          ["breadcrumb", 124],
+          ["promotion", 122],
+          ["discount", 120],
+          ["offer", 118],
+          ["price", 116],
+          ["money", 114],
+          ["amount", 112],
+          ["gallery", 110],
+          ["carousel", 108],
+          ["seller", 106],
+          ["buybox", 104],
+        ];
+
+        for (const [classToken, boost] of classBoosts) {
+          if (className.includes(classToken)) score += boost;
+        }
+
+        const attributeBoosts = [
+          ["data-andes-button", 40],
+          ["data-testid", 34],
+          ["data-js", 28],
+          ["data-id", 26],
+          ["data-name", 24],
+          ["data-state", 22],
+          ["data-role", 20],
+        ];
+
+        for (const [attributeName, boost] of attributeBoosts) {
+          if (element.hasAttribute(attributeName)) score += boost;
+        }
+
         if (element.getAttribute("aria-label")) score += 8;
         if (element.getAttribute("role")) score += 5;
         if (tag === "img" && element.alt) score += 8;
@@ -554,11 +620,86 @@ async function drawImportantLines() {
       const candidates = Array.from(
         document.querySelectorAll(
           [
-            "h1", "h2", "h3", "h4", "h5", "h6",
-            "p", "img", "button", "a", "input",
-            "textarea", "select", "main", "article",
-            "section", "nav", "[aria-label]",
-            "[role='button']", "[role='img']", "[role='main']",
+            // Product Detail Page containers
+  "[class*='ui-pdp-']",
+  ".andes-money-amount__fraction",
+  ".andes-money-amount__discount ui-pdp-family--SEMIBOLD ui-pdp-color--WHITE ui-pdp-background-color--GREEN ui-pdp-size--XSMALL ui-pdp-price__discount--with-bg-color",
+  ".ui-pdp-price__subtitles",
+  // Main product container
+  ".ui-pdp-container",
+  ".ui-pdp",
+
+  // Product title
+  ".ui-pdp-title",
+
+  // Price
+  ".ui-pdp-price",
+  "[class*='price']",
+  "[class*='money']",
+  "[class*='amount']",
+
+  // Buy box
+  ".ui-pdp-buybox",
+  "[class*='buybox']",
+
+  // Product images
+  ".ui-pdp-gallery",
+  "[class*='gallery']",
+  "[class*='carousel']",
+
+  // Seller
+  ".ui-pdp-seller-summary",
+  "[class*='seller']",
+
+  // Shipping
+  "[class*='shipping']",
+  "[class*='delivery']",
+
+  // Reviews / ratings
+  "[class*='review']",
+  "[class*='rating']",
+  "[class*='stars']",
+
+  // Specifications
+  "[class*='specification']",
+  "[class*='attribute']",
+
+  // Breadcrumbs
+  "[class*='breadcrumb']",
+
+  // Promotions
+  "[class*='promotion']",
+  "[class*='discount']",
+  "[class*='offer']",
+
+  // Buttons
+  "[data-andes-button]",
+  ".andes-button",
+
+  // Images
+  "picture",
+  "figure",
+
+  // Forms
+  "form",
+
+  // Schema.org
+  "[itemprop]",
+  "[itemscope]",
+  "[itemtype]",
+
+  // Common metadata
+  "script[type='application/ld+json']",
+
+  // Test IDs
+  "[data-testid]",
+
+  // Generic data attributes
+  "[data-js]",
+  "[data-id]",
+  "[data-name]",
+  "[data-state]",
+  "[data-role]"
           ].join(",")
         )
       )
@@ -577,7 +718,8 @@ async function drawImportantLines() {
         if (seen.has(element)) continue;
         seen.add(element);
         unique.push(element);
-        if (unique.length >= 28) break;
+        // amount of lines drawn! change here!!
+        if (unique.length >= 68) break;
       }
 
       if (unique.length === 0) {
@@ -992,6 +1134,7 @@ app.addEventListener("click", async (event) => {
   }
 
   renderLoadingScreen();
+  fitPopupToContent();
   await new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
   try {
