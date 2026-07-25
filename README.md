@@ -1,4 +1,4 @@
-# NEXO360
+# ZEUX360AGENT
 Colsubsidio conoce la información demográfica y laboral de sus afiliados, pero esa fotografía no siempre revela qué necesita cada persona en su momento actual.
 
 NEXO360 convierte ese perfil estático en un perfil vivo. Mediante un onboarding conversacional, un agente de IA identifica objetivos, necesidades, capacidad de pago y preferencias de contacto. Esta información alimenta un Grafo Vivo del Afiliado, enriquecido con interacciones en canales y portales, uso de servicios Colsubsidio, simulaciones, retroalimentación y señales externas autorizadas.
