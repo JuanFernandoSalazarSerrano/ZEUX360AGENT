@@ -24,6 +24,8 @@ const STORAGE_KEYS = {
   loggedIn: "colsubsidio_logged_in",
   termsAccepted: "colsubsidio_terms_accepted",
   userName: "colsubsidio_user_name",
+  numeroDocumento: "numero_documento_usuario",
+  tipoDocumento: "tipo_documento_usuario"
 };
 
 function safeGet(key) {
@@ -59,6 +61,73 @@ function escapeHtml(value) {
   const div = document.createElement("div");
   div.textContent = value;
   return div.innerHTML;
+}
+
+const MERCADOLIBRE_DEFAULT_PRODUCT = {
+  category: "Deporte y recreaci\u00f3n",
+  name: "Bicicleta Mtb Gw Aluminio Scorpion Shimano 7 Monta\u00f1a Color Gris Tama\u00f1o Del Marco 17\"",
+  image:
+    "https://http2.mlstatic.com/D_NQ_NP_2X_791332-MLA109640286585_032026-F.webp",
+  price: "COP 789.900",
+};
+
+function normalizeMercadolibreText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function firstDefinedValue(values) {
+  return values.find((value) => normalizeMercadolibreText(value)) || "";
+}
+
+function truncateMercadolibreName(value, maxWords = 2) {
+  const words = normalizeMercadolibreText(value).split(" ").filter(Boolean);
+  return words.slice(0, maxWords).join(" ");
+}
+
+function formatMercadolibrePrice(value) {
+  const text = normalizeMercadolibreText(value)
+    .replace(/\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?\s*%\s*OFF\b/gi, "")
+    .replace(/\b\d+(?:[.,]\d+)?\s*%\s*OFF\b/gi, "")
+    .trim();
+
+  const moneyPattern = /(?:COP|USD|EUR|MXN|ARS|CLP|PEN|BRL)?\s*\$?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?)/gi;
+  const matches = [...text.matchAll(moneyPattern)].map((match) =>
+    normalizeMercadolibreText(match[1]),
+  );
+
+  if (matches.length > 0) {
+    return matches[matches.length - 1];
+  }
+
+  return text;
+}
+
+function parseMercadolibreAmount(value) {
+  const text = normalizeMercadolibreText(value);
+  const match = text.match(/\d[\d.,]*/);
+  if (!match) {
+    return null;
+  }
+
+  const digitsOnly = match[0].replace(/\D/g, "");
+  if (!digitsOnly) {
+    return null;
+  }
+
+  return Number(digitsOnly);
+}
+
+function formatCopAmount(amount) {
+  const numericAmount = Number.isFinite(amount) ? Math.round(amount) : 0;
+  return `COP ${new Intl.NumberFormat("es-CO").format(numericAmount)}`;
+}
+
+function calculateCashbackAmount(priceAmount, cashbackRate = 0.1) {
+  return Math.round(priceAmount * cashbackRate);
+}
+
+function calculateMonthlyInstallment(priceAmount, months = 12) {
+  return Math.round(priceAmount / months);
 }
 
 // Decide qué pantalla mostrar según el estado guardado.
@@ -302,10 +371,33 @@ function renderLoadingScreen() {
   `;
 }
 
-function renderCompleteScreen() {
+function renderCompleteScreen(product = MERCADOLIBRE_DEFAULT_PRODUCT) {
   const name = getUserName();
   const firstName = name.split(/\s+/)[0] || "";
   const greeting = firstName ? `, ${escapeHtml(firstName)}` : "";
+  const category = escapeHtml(
+    product.category || MERCADOLIBRE_DEFAULT_PRODUCT.category,
+  );
+  const productName = escapeHtml(
+    truncateMercadolibreName(
+      product.name || MERCADOLIBRE_DEFAULT_PRODUCT.name,
+      2,
+    ),
+  );
+  const rawPrice = product.price || MERCADOLIBRE_DEFAULT_PRODUCT.price;
+  const priceAmount =
+    parseMercadolibreAmount(rawPrice) ??
+    parseMercadolibreAmount(MERCADOLIBRE_DEFAULT_PRODUCT.price) ??
+    0;
+  const productPrice = escapeHtml(formatCopAmount(priceAmount));
+  const monthlyInstallment = escapeHtml(
+    formatCopAmount(calculateMonthlyInstallment(priceAmount)),
+  );
+  const cashbackAmount = escapeHtml(
+    formatCopAmount(calculateCashbackAmount(priceAmount)),
+  );
+  const productImage =
+    product.image || MERCADOLIBRE_DEFAULT_PRODUCT.image;
 
   app.innerHTML = `
     <div class="screen opportunity">
@@ -316,11 +408,11 @@ function renderCompleteScreen() {
       <h1 class="opportunity-title" style="margin-bottom: 18px;">Encontramos una oportunidad muy especial solo para ti${greeting}!</h1>
 
       <div class="product-summary">
-        <img class="product-thumb" src="https://http2.mlstatic.com/D_NQ_NP_2X_791332-MLA109640286585_032026-F.webp" alt="Bicicleta Rockrider MTB" />
+        <img class="product-thumb" src="${productImage}" alt="${productName}" />
         <div class="product-info">
-          <div class="product-name">Bicicleta Mtb Gw Aluminio Scorpion Shimano 7 Montaña Color Gris Tamaño Del Marco 17&quot;</div>
-          <div class="product-price">COP 789.900</div>
-          <span class="product-tag">Deporte y recreaci&oacute;n</span>
+          <div class="product-name">${productName}</div>
+          <div class="product-price">${productPrice}</div>
+          <span class="product-tag">${category}</span>
         </div>
       </div>
 
@@ -336,7 +428,7 @@ function renderCompleteScreen() {
       <div class="stat-grid">
         <div class="stat">
           <span>Cuota mensual</span>
-          <strong>COP 71.667</strong>
+          <strong>${monthlyInstallment}</strong>
         </div>
         <div class="stat">
           <span>Tasa de inter&eacute;s</span>
@@ -344,7 +436,7 @@ function renderCompleteScreen() {
         </div>
         <div class="stat accent">
           <span>Cashback</span>
-          <strong>5% &middot; COP 39.495</strong>
+          <strong>10% &middot; ${cashbackAmount}</strong>
         </div>
         <div class="stat">
           <span>Aprobaci&oacute;n</span>
@@ -462,12 +554,123 @@ async function drawImportantLines() {
     throw new Error("No se encontró una pestaña activa.");
   }
 
-  await chrome.scripting.executeScript({
+  const [result] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: async () => {
       const overlayId = "optin-important-lines-overlay";
       const existing = document.getElementById(overlayId);
       if (existing) existing.remove();
+
+      const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+
+      const toElement = (candidate) => {
+        if (!candidate) return null;
+        if (candidate instanceof Element) return candidate;
+        if (candidate.element instanceof Element) return candidate.element;
+        if (candidate.node instanceof Element) return candidate.node;
+        if (candidate.target instanceof Element) return candidate.target;
+        if (typeof candidate === "string") return document.querySelector(candidate);
+        if (candidate.selector) return document.querySelector(candidate.selector);
+        if (candidate.query) return document.querySelector(candidate.query);
+        return null;
+      };
+
+      const readText = (element) => normalize(element?.textContent);
+      const readPriceValue = (element) => {
+        if (!element) return "";
+        const content = element.getAttribute?.("content") || "";
+        const text = normalize(element.textContent);
+        return content || text || "";
+      };
+      const readImageSrc = (element) => {
+        if (!element) return "";
+        if (element.tagName?.toLowerCase() === "img") {
+          return element.currentSrc || element.src || element.getAttribute("src") || "";
+        }
+        const image = element.querySelector?.("img");
+        if (image) {
+          return image.currentSrc || image.src || image.getAttribute("src") || "";
+        }
+        return element.getAttribute?.("src") || "";
+      };
+
+      const mercadolibreCandidates = Array.isArray(window.candidatesMercadolibre)
+        ? window.candidatesMercadolibre
+        : [];
+      const mercadolibreElements = mercadolibreCandidates.map(toElement).filter(Boolean);
+
+      const findDisplayElement = (selectors) => {
+        for (const selector of selectors) {
+          const fromCandidates = mercadolibreElements.find((element) => {
+            try {
+              return element.matches(selector);
+            } catch {
+              return false;
+            }
+          });
+          if (fromCandidates) return fromCandidates;
+
+          try {
+            const fallback = document.querySelector(selector);
+            if (fallback) return fallback;
+          } catch {
+            // Ignore invalid selectors.
+          }
+        }
+        return null;
+      };
+
+      const product = {
+        category: readText(
+          findDisplayElement([".andes-breadcrumb", "[class*='andes-breadcrumb']"]),
+        ),
+        name: readText(
+          findDisplayElement([".ui-pdp-title", "[class*='ui-pdp-title']"]),
+        ),
+        image: readImageSrc(
+          findDisplayElement([
+            ".ui-pdp-image.ui-pdp-gallery__figure__image",
+            ".ui-pdp-gallery__figure__image",
+            ".ui-pdp-image",
+            "img.ui-pdp-image",
+          ]),
+        ),
+        price: (() => {
+          const priceContainer = document.querySelector(
+            ".ui-pdp-container__row.ui-pdp-container__row--price",
+          );
+          const priceElement = priceContainer?.querySelector(
+            "[itemprop='price']",
+          );
+          return (
+            readPriceValue(priceElement) ||
+            readPriceValue(
+              findDisplayElement([
+                "[itemprop='price']",
+                ".ui-pdp-price__price-breakdown-inline",
+                "[class*='ui-pdp-price__price-breakdown-inline']",
+              ]),
+            ) ||
+            "0"
+          );
+        })(),
+      };
+
+      const displayElements = [
+        findDisplayElement([".andes-breadcrumb", "[class*='andes-breadcrumb']"]),
+        findDisplayElement([".ui-pdp-title", "[class*='ui-pdp-title']"]),
+        findDisplayElement([
+          ".ui-pdp-image.ui-pdp-gallery__figure__image",
+          ".ui-pdp-gallery__figure__image",
+          ".ui-pdp-image",
+          "img.ui-pdp-image",
+        ]),
+        findDisplayElement([
+          ".ui-pdp-price__price-breakdown-inline",
+          "[class*='ui-pdp-price__price-breakdown-inline']",
+        ]),
+      ].filter(Boolean);
+      const displayElementSet = new Set(displayElements);
 
       // ---- Spanish data sources for the KPI ticker ----
       const creditTypes = [
@@ -725,6 +928,7 @@ async function drawImportantLines() {
         ),
       )
         .filter((element) => visible(element))
+        .filter((element) => !displayElementSet.has(element))
         .sort((left, right) => {
           const scoreDelta = scoreElement(right) - scoreElement(left);
           if (scoreDelta !== 0) return scoreDelta;
@@ -1200,10 +1404,13 @@ async function drawImportantLines() {
       originDot.remove();
       gridGroup.remove();
       overlay.remove();
+
+      return product;
     },
   });
 
   setStatus("Simulación completada.");
+  return result?.result || null;
 }
 
 app.addEventListener("click", async (event) => {
@@ -1217,8 +1424,8 @@ app.addEventListener("click", async (event) => {
   await new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
   try {
-    await drawImportantLines();
-    renderCompleteScreen();
+    const product = await drawImportantLines();
+    renderCompleteScreen(product || MERCADOLIBRE_DEFAULT_PRODUCT);
   } catch (error) {
     console.error(error);
     renderErrorScreen(
