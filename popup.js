@@ -974,7 +974,7 @@ async function drawImportantLines() {
       document.documentElement.appendChild(overlay);
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      const infoRepresentationDuration = 100;
+      const infoRepresentationDuration = 1100;
       const startX = Math.max(0, window.innerWidth - 300);
       const startY = 10;
 

@@ -3,7 +3,7 @@
 // actual product content — NOT just the <head> meta tags, which are present even on
 // MercadoLibre's bot-challenge interstitial and so aren't a valid "loaded" signal.
 
-const BACKEND_ENDPOINT = 'http://localhost:8000/datastream';
+const BACKEND_ENDPOINT = 'http://192.168.80.18:3000/datastream';
 const PRODUCT_URL_MARKERS = ['articulo', '/p/'];
 
 // Verify/adjust via DevTools on your target page — this must be something that only
