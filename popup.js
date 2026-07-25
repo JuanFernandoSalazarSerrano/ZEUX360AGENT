@@ -177,7 +177,10 @@ function renderLoginScreen() {
   toggle.addEventListener("click", () => {
     const willShow = password.type === "password";
     password.type = willShow ? "text" : "password";
-    toggle.setAttribute("aria-label", willShow ? "Ocultar contrase\u00f1a" : "Mostrar contrase\u00f1a");
+    toggle.setAttribute(
+      "aria-label",
+      willShow ? "Ocultar contrase\u00f1a" : "Mostrar contrase\u00f1a",
+    );
   });
 
   form.addEventListener("submit", (event) => {
@@ -310,7 +313,7 @@ function renderCompleteScreen() {
         <img class="logo logo-sm" src="LogoV1.png" alt="Colsubsidio" />
       </div>
 
-      <h1 class="opportunity-title" style="margin-bottom: 18px;">Encontramos una oportunidad para ti${greeting}</h1>
+      <h1 class="opportunity-title" style="margin-bottom: 18px;">Encontramos una oportunidad muy especial solo para ti${greeting}!</h1>
 
       <div class="product-summary">
         <img class="product-thumb" src="https://http2.mlstatic.com/D_NQ_NP_2X_791332-MLA109640286585_032026-F.webp" alt="Bicicleta Rockrider MTB" />
@@ -498,7 +501,8 @@ async function drawImportantLines() {
         "Evento presencial",
       ];
 
-      const randomFrom = (list) => list[Math.floor(Math.random() * list.length)];
+      const randomFrom = (list) =>
+        list[Math.floor(Math.random() * list.length)];
 
       const randomChange = () => {
         const magnitude = Math.random();
@@ -516,7 +520,10 @@ async function drawImportantLines() {
         return [
           { label: randomFrom(creditTypes).toUpperCase(), ...creditChange },
           { label: "RIESGO DE IMPAGO", ...riskChange },
-          { label: randomFrom(communicationChannels).toUpperCase(), ...channelChange },
+          {
+            label: randomFrom(communicationChannels).toUpperCase(),
+            ...channelChange,
+          },
         ];
       };
 
@@ -539,41 +546,55 @@ async function drawImportantLines() {
       const scoreElement = (element) => {
         const tag = element.tagName.toLowerCase();
         const baseScores = {
-          h1: 100, h2: 95, h3: 90, h4: 85, h5: 80, h6: 75,
-          img: 70, p: 60, button: 58, a: 56, input: 54,
-          textarea: 54, select: 54, article: 52, main: 51,
-          section: 50, nav: 45,
+          h1: 40,
+          h2: 38,
+          h3: 36,
+          h4: 34,
+          h5: 32,
+          h6: 30,
+          img: 28,
+          p: 26,
+          button: 25,
+          a: 24,
+          input: 23,
+          textarea: 23,
+          select: 23,
+          article: 22,
+          main: 21,
+          section: 20,
+          nav: 18,
         };
 
         let score = baseScores[tag] ?? 10;
         const className = element.className?.toString() || "";
+
         const classBoosts = [
-          ["andes-money-amount__fraction", 220],
-          ["andes-money-amount__discount", 210],
-          ["ui-pdp-price", 200],
-          ["ui-pdp-title", 190],
-          ["ui-pdp-buybox", 180],
-          ["ui-pdp-gallery", 170],
-          ["ui-pdp-seller-summary", 160],
-          ["ui-pdp-price__subtitles", 150],
-          ["shipping", 140],
-          ["delivery", 138],
-          ["review", 136],
-          ["rating", 134],
-          ["stars", 132],
-          ["specification", 128],
-          ["attribute", 126],
-          ["breadcrumb", 124],
-          ["promotion", 122],
-          ["discount", 120],
-          ["offer", 118],
-          ["price", 116],
-          ["money", 114],
-          ["amount", 112],
-          ["gallery", 110],
-          ["carousel", 108],
-          ["seller", 106],
-          ["buybox", 104],
+          ["andes-money-amount__fraction", 70],
+          ["andes-money-amount__discount", 68],
+          ["ui-pdp-price", 55],
+          ["ui-pdp-title", 50],
+          ["ui-pdp-buybox", 90],
+          ["ui-pdp-gallery", 40],
+          ["ui-pdp-seller-summary", 36],
+          ["ui-pdp-price__subtitles", 30],
+          ["shipping", 32],
+          ["delivery", 31],
+          ["review", 30],
+          ["rating", 29],
+          ["stars", 28],
+          ["specification", 27],
+          ["attribute", 26],
+          ["breadcrumb", 25],
+          ["promotion", 24],
+          ["discount", 23],
+          ["offer", 22],
+          ["price", 21],
+          ["money", 20],
+          ["amount", 19],
+          ["gallery", 18],
+          ["carousel", 17],
+          ["seller", 16],
+          ["buybox", 15],
         ];
 
         for (const [classToken, boost] of classBoosts) {
@@ -581,13 +602,13 @@ async function drawImportantLines() {
         }
 
         const attributeBoosts = [
-          ["data-andes-button", 40],
-          ["data-testid", 34],
-          ["data-js", 28],
-          ["data-id", 26],
-          ["data-name", 24],
-          ["data-state", 22],
-          ["data-role", 20],
+          ["data-andes-button", 10],
+          ["data-testid", 9],
+          ["data-js", 8],
+          ["data-id", 7],
+          ["data-name", 6],
+          ["data-state", 5],
+          ["data-role", 4],
         ];
 
         for (const [attributeName, boost] of attributeBoosts) {
@@ -621,87 +642,87 @@ async function drawImportantLines() {
         document.querySelectorAll(
           [
             // Product Detail Page containers
-  "[class*='ui-pdp-']",
-  ".andes-money-amount__fraction",
-  ".andes-money-amount__discount ui-pdp-family--SEMIBOLD ui-pdp-color--WHITE ui-pdp-background-color--GREEN ui-pdp-size--XSMALL ui-pdp-price__discount--with-bg-color",
-  ".ui-pdp-price__subtitles",
-  // Main product container
-  ".ui-pdp-container",
-  ".ui-pdp",
+            "[class*='ui-pdp-']",
+            ".andes-money-amount__fraction",
+            ".andes-money-amount__discount ui-pdp-family--SEMIBOLD ui-pdp-color--WHITE ui-pdp-background-color--GREEN ui-pdp-size--XSMALL ui-pdp-price__discount--with-bg-color",
+            ".ui-pdp-price__subtitles",
+            // Main product container
+            ".ui-pdp-container",
+            ".ui-pdp",
 
-  // Product title
-  ".ui-pdp-title",
+            // Product title
+            ".ui-pdp-title",
 
-  // Price
-  ".ui-pdp-price",
-  "[class*='price']",
-  "[class*='money']",
-  "[class*='amount']",
+            // Price
+            ".ui-pdp-price",
+            "[class*='price']",
+            "[class*='money']",
+            "[class*='amount']",
 
-  // Buy box
-  ".ui-pdp-buybox",
-  "[class*='buybox']",
+            // Buy box
+            ".ui-pdp-buybox",
+            "[class*='buybox']",
 
-  // Product images
-  ".ui-pdp-gallery",
-  "[class*='gallery']",
-  "[class*='carousel']",
+            // Product images
+            ".ui-pdp-gallery",
+            "[class*='gallery']",
+            "[class*='carousel']",
 
-  // Seller
-  ".ui-pdp-seller-summary",
-  "[class*='seller']",
+            // Seller
+            ".ui-pdp-seller-summary",
+            "[class*='seller']",
 
-  // Shipping
-  "[class*='shipping']",
-  "[class*='delivery']",
+            // Shipping
+            "[class*='shipping']",
+            "[class*='delivery']",
 
-  // Reviews / ratings
-  "[class*='review']",
-  "[class*='rating']",
-  "[class*='stars']",
+            // Reviews / ratings
+            "[class*='review']",
+            "[class*='rating']",
+            "[class*='stars']",
 
-  // Specifications
-  "[class*='specification']",
-  "[class*='attribute']",
+            // Specifications
+            "[class*='specification']",
+            "[class*='attribute']",
 
-  // Breadcrumbs
-  "[class*='breadcrumb']",
+            // Breadcrumbs
+            "[class*='breadcrumb']",
 
-  // Promotions
-  "[class*='promotion']",
-  "[class*='discount']",
-  "[class*='offer']",
+            // Promotions
+            "[class*='promotion']",
+            "[class*='discount']",
+            "[class*='offer']",
 
-  // Buttons
-  "[data-andes-button]",
-  ".andes-button",
+            // Buttons
+            "[data-andes-button]",
+            ".andes-button",
 
-  // Images
-  "picture",
-  "figure",
+            // Images
+            "picture",
+            "figure",
 
-  // Forms
-  "form",
+            // Forms
+            "form",
 
-  // Schema.org
-  "[itemprop]",
-  "[itemscope]",
-  "[itemtype]",
+            // Schema.org
+            "[itemprop]",
+            "[itemscope]",
+            "[itemtype]",
 
-  // Common metadata
-  "script[type='application/ld+json']",
+            // Common metadata
+            "script[type='application/ld+json']",
 
-  // Test IDs
-  "[data-testid]",
+            // Test IDs
+            "[data-testid]",
 
-  // Generic data attributes
-  "[data-js]",
-  "[data-id]",
-  "[data-name]",
-  "[data-state]",
-  "[data-role]"
-          ].join(",")
-        )
+            // Generic data attributes
+            "[data-js]",
+            "[data-id]",
+            "[data-name]",
+            "[data-state]",
+            "[data-role]",
+          ].join(","),
+        ),
       )
         .filter((element) => visible(element))
         .sort((left, right) => {
@@ -737,7 +758,10 @@ async function drawImportantLines() {
       const svg = document.createElementNS(svgNS, "svg");
       svg.setAttribute("width", String(window.innerWidth));
       svg.setAttribute("height", String(window.innerHeight));
-      svg.setAttribute("viewBox", `0 0 ${window.innerWidth} ${window.innerHeight}`);
+      svg.setAttribute(
+        "viewBox",
+        `0 0 ${window.innerWidth} ${window.innerHeight}`,
+      );
       svg.style.width = "100%";
       svg.style.height = "100%";
       svg.style.overflow = "visible";
@@ -806,15 +830,30 @@ async function drawImportantLines() {
       const bracketMargin = 14;
       const corners = [
         { x: bracketMargin, y: bracketMargin, dx: 1, dy: 1 },
-        { x: window.innerWidth - bracketMargin, y: bracketMargin, dx: -1, dy: 1 },
-        { x: bracketMargin, y: window.innerHeight - bracketMargin, dx: 1, dy: -1 },
-        { x: window.innerWidth - bracketMargin, y: window.innerHeight - bracketMargin, dx: -1, dy: -1 },
+        {
+          x: window.innerWidth - bracketMargin,
+          y: bracketMargin,
+          dx: -1,
+          dy: 1,
+        },
+        {
+          x: bracketMargin,
+          y: window.innerHeight - bracketMargin,
+          dx: 1,
+          dy: -1,
+        },
+        {
+          x: window.innerWidth - bracketMargin,
+          y: window.innerHeight - bracketMargin,
+          dx: -1,
+          dy: -1,
+        },
       ];
       corners.forEach(({ x, y, dx, dy }) => {
         const bracket = document.createElementNS(svgNS, "path");
         bracket.setAttribute(
           "d",
-          `M ${x} ${y + bracketSize * dy} L ${x} ${y} L ${x + bracketSize * dx} ${y}`
+          `M ${x} ${y + bracketSize * dy} L ${x} ${y} L ${x + bracketSize * dx} ${y}`,
         );
         bracket.setAttribute("stroke", "#FFE100");
         bracket.setAttribute("stroke-width", "2");
@@ -856,8 +895,14 @@ async function drawImportantLines() {
 
       for (const element of unique) {
         const rect = element.getBoundingClientRect();
-        const endX = Math.max(0, Math.min(window.innerWidth, rect.left + rect.width / 2));
-        const endY = Math.max(0, Math.min(window.innerHeight, rect.top + rect.height / 2));
+        const endX = Math.max(
+          0,
+          Math.min(window.innerWidth, rect.left + rect.width / 2),
+        );
+        const endY = Math.max(
+          0,
+          Math.min(window.innerHeight, rect.top + rect.height / 2),
+        );
         const label = extractLabel(element).toUpperCase();
         // Anchor labels at 85% of the line (15% away from the end point)
         const midX = startX + (endX - startX) * 0.85;
@@ -903,7 +948,10 @@ async function drawImportantLines() {
         for (let dotIndex = 0; dotIndex < flowDotCount; dotIndex += 1) {
           const flowDot = document.createElementNS(svgNS, "circle");
           flowDot.setAttribute("r", String(2.8 + Math.random() * 1.4));
-          flowDot.setAttribute("fill", dotIndex % 2 === 0 ? "#E8F2FF" : "#FFE100");
+          flowDot.setAttribute(
+            "fill",
+            dotIndex % 2 === 0 ? "#E8F2FF" : "#FFE100",
+          );
           flowDot.setAttribute("filter", "url(#optin-line-glow)");
           flowDot.setAttribute("opacity", "0");
           flowDots.push(flowDot);
@@ -933,7 +981,10 @@ async function drawImportantLines() {
         if (lines.length === 0) lines.push(label);
 
         const longestLine = Math.max(...lines.map((line) => line.length));
-        const labelWidth = Math.min(360, Math.max(150, longestLine * charWidth + 28));
+        const labelWidth = Math.min(
+          360,
+          Math.max(150, longestLine * charWidth + 28),
+        );
         const lineHeight = 14;
         const labelHeight = Math.max(26, lines.length * lineHeight + 14);
         const boxX = midX - 8;
@@ -958,19 +1009,28 @@ async function drawImportantLines() {
         accentTick.setAttribute("fill", "#FFE100");
 
         const labelText = document.createElementNS(svgNS, "text");
-        labelText.setAttribute("x", String(boxX + tickWidth + (labelWidth - tickWidth) / 2));
+        labelText.setAttribute(
+          "x",
+          String(boxX + tickWidth + (labelWidth - tickWidth) / 2),
+        );
         labelText.setAttribute("y", String(boxY + 10));
         labelText.setAttribute("text-anchor", "middle");
         labelText.setAttribute("dominant-baseline", "hanging");
         labelText.setAttribute("fill", "#FFFFFF");
-        labelText.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace");
+        labelText.setAttribute(
+          "font-family",
+          "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        );
         labelText.setAttribute("font-size", String(labelFontSize));
         labelText.setAttribute("font-weight", "600");
         labelText.setAttribute("letter-spacing", "0.8");
 
         lines.forEach((line, index) => {
           const tspan = document.createElementNS(svgNS, "tspan");
-          tspan.setAttribute("x", String(boxX + tickWidth + (labelWidth - tickWidth) / 2));
+          tspan.setAttribute(
+            "x",
+            String(boxX + tickWidth + (labelWidth - tickWidth) / 2),
+          );
           tspan.setAttribute("dy", index === 0 ? "0" : String(lineHeight));
           tspan.textContent = line;
           labelText.appendChild(tspan);
@@ -991,7 +1051,10 @@ async function drawImportantLines() {
         const tickerPaddingV = 8;
         const tickerHeight = tickerPaddingV * 2 + rowHeight * 3;
         const longestLabel = Math.max(...kpis.map((k) => k.label.length));
-        const tickerWidth = Math.min(300, Math.max(170, longestLabel * 5.6 + 70));
+        const tickerWidth = Math.min(
+          300,
+          Math.max(170, longestLabel * 5.6 + 70),
+        );
 
         let tickerX = boxX + labelWidth + 10;
         if (tickerX + tickerWidth > window.innerWidth - 8) {
@@ -1030,13 +1093,18 @@ async function drawImportantLines() {
           rowLabel.setAttribute("text-anchor", "start");
           rowLabel.setAttribute("dominant-baseline", "central");
           rowLabel.setAttribute("fill", "#9FB6D9");
-          rowLabel.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace");
+          rowLabel.setAttribute(
+            "font-family",
+            "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+          );
           rowLabel.setAttribute("font-size", "8.5");
           rowLabel.setAttribute("font-weight", "600");
           rowLabel.setAttribute("letter-spacing", "0.4");
           const maxChars = 24;
           rowLabel.textContent =
-            kpi.label.length > maxChars ? kpi.label.slice(0, maxChars - 1) + "…" : kpi.label;
+            kpi.label.length > maxChars
+              ? kpi.label.slice(0, maxChars - 1) + "…"
+              : kpi.label;
 
           const rowValue = document.createElementNS(svgNS, "text");
           rowValue.setAttribute("x", String(tickerX + tickerWidth - 8));
@@ -1044,7 +1112,10 @@ async function drawImportantLines() {
           rowValue.setAttribute("text-anchor", "end");
           rowValue.setAttribute("dominant-baseline", "central");
           rowValue.setAttribute("fill", kpi.color);
-          rowValue.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace");
+          rowValue.setAttribute(
+            "font-family",
+            "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+          );
           rowValue.setAttribute("font-size", "9");
           rowValue.setAttribute("font-weight", "700");
           rowValue.textContent = kpi.display;
@@ -1078,14 +1149,22 @@ async function drawImportantLines() {
             const startTime = performance.now() + delay;
 
             const animateDot = (now) => {
-              const progress = Math.min(1, Math.max(0, (now - startTime) / duration));
+              const progress = Math.min(
+                1,
+                Math.max(0, (now - startTime) / duration),
+              );
               const eased = progress * progress * (3 - 2 * progress);
               const currentX = endX + (startX - endX) * eased;
               const currentY = endY + (startY - endY) * eased;
 
               flowDot.setAttribute("cx", String(currentX));
               flowDot.setAttribute("cy", String(currentY));
-              flowDot.setAttribute("opacity", progress < 0.01 ? "0" : String(0.55 + (1 - Math.abs(0.5 - progress) * 2) * 0.45));
+              flowDot.setAttribute(
+                "opacity",
+                progress < 0.01
+                  ? "0"
+                  : String(0.55 + (1 - Math.abs(0.5 - progress) * 2) * 0.45),
+              );
 
               if (progress < 1) {
                 requestAnimationFrame(animateDot);
@@ -1142,7 +1221,11 @@ app.addEventListener("click", async (event) => {
     renderCompleteScreen();
   } catch (error) {
     console.error(error);
-    renderErrorScreen(error instanceof Error ? error.message : "No se pudo completar la simulación.");
+    renderErrorScreen(
+      error instanceof Error
+        ? error.message
+        : "No se pudo completar la simulación.",
+    );
   }
 });
 
