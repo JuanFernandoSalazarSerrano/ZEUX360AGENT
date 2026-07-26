@@ -67,6 +67,7 @@ export class DatastreamService {
         { numeroIdentificacion: normalizedValue },
         { numero_identificacion: normalizedValue },
         { NumeroIdentificacion: normalizedValue },
+        { numero_documento_usuario: normalizedValue },
         { "extensionStorage.numeroIdentificacion": normalizedValue },
         { "extensionStorage.numero_identificacion": normalizedValue },
         { "extensionStorage.NumeroIdentificacion": normalizedValue },
