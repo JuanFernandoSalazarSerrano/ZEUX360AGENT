@@ -12,7 +12,7 @@ El afiliado recibe una explicación clara y personalizada, mientras el asesor vi
 
 Cada respuesta del afiliado vuelve al grafo y mejora la siguiente recomendación.
 
-**NEXO360 no solo ofrece crédito: construye una conversación continua entre Colsubsidio y cada afiliado.**
+**ZeuX360AGENT no solo ofrece crédito: construye una conversación continua entre Colsubsidio y cada afiliado.**
 
 ---
 
