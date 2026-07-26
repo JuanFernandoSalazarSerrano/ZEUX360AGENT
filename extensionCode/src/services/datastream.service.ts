@@ -8,6 +8,8 @@ import { ValidationHttpError } from "../utils/errors.js";
 import type { InsightService } from "./insight.service.js";
 
 export class DatastreamService {
+  private static readonly MAX_DOCUMENT_HTML_LENGTH = 10_000_000;
+
   constructor(
     private readonly eventsCollection: Collection<ProductEvent>,
     private readonly insightService: InsightService,
@@ -18,8 +20,10 @@ export class DatastreamService {
     const parsedPayload = this.validatePayload(payload);
     const merchant = detectMerchant(parsedPayload.url);
 
+    const documentHtml = this.truncateDocumentHtml(parsedPayload.documentHtml);
+
     // ETL is isolated and deterministic; no I/O side effects happen before canonicalization.
-    const { product } = runMercadoLibreEtl(parsedPayload.documentHtml);
+    const { product } = runMercadoLibreEtl(documentHtml);
 
     const insight = await this.insightService.buildInsight(product);
 
@@ -98,6 +102,14 @@ export class DatastreamService {
     }
 
     return parsed.data;
+  }
+
+  private truncateDocumentHtml(documentHtml: string): string {
+    if (documentHtml.length <= DatastreamService.MAX_DOCUMENT_HTML_LENGTH) {
+      return documentHtml;
+    }
+
+    return documentHtml.slice(0, DatastreamService.MAX_DOCUMENT_HTML_LENGTH);
   }
 
   private resolveUserId(storage: Record<string, unknown>): string {

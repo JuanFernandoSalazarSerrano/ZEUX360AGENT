@@ -1,4 +1,6 @@
 import type { CanonicalProduct } from "../types/product-event.js";
+import { parse } from "node-html-parser";
+import { EtlError } from "../utils/errors.js";
 import { cleanRecursively } from "./clean.js";
 import { extractLargestProductJson } from "./extract-largest-product-json.js";
 import { flattenObject } from "./flatten.js";
@@ -17,6 +19,44 @@ export interface EtlResult {
   product: CanonicalProduct;
   artifacts: EtlDebugArtifacts;
 }
+
+const parseHtmlPrice = (raw: string | null | undefined): number | undefined => {
+  if (!raw) {
+    return undefined;
+  }
+
+  const normalized = raw.replace(/\u00A0/g, " ").trim();
+  const digits = normalized.replace(/[^\d.,]/g, "").replace(/\s+/g, "");
+  if (!digits) {
+    return undefined;
+  }
+
+  const parsed = Number(digits.replace(/\./g, "").replace(/,/g, "."));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+};
+
+const extractPriceFromHtml = (documentHtml: string): number | undefined => {
+  const root = parse(documentHtml);
+  const priceContainer = root.querySelector("div.ui-pdp-container__row.ui-pdp-container__row--price");
+
+  const candidates = [
+    priceContainer?.querySelector('[itemprop="price"]'),
+    root.querySelector('[itemprop="price"]'),
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue;
+    }
+
+    const value = parseHtmlPrice(candidate.getAttribute("content") ?? candidate.textContent);
+    if (value !== undefined) {
+      return value;
+    }
+  }
+
+  return undefined;
+};
 
 export const runMercadoLibreEtl = (documentHtml: string): EtlResult => {
   // 1) Extract product-related JSON from HTML scripts.
@@ -39,6 +79,15 @@ export const runMercadoLibreEtl = (documentHtml: string): EtlResult => {
 
   // 7) Create the canonical product object used by all merchants.
   const product = toCanonicalProduct(selected);
+
+  if (product.price === undefined || product.price <= 0) {
+    const fallbackPrice = extractPriceFromHtml(documentHtml);
+    if (fallbackPrice === undefined) {
+      throw new EtlError("Could not determine product price from JSON or HTML fallback.");
+    }
+
+    product.price = fallbackPrice;
+  }
 
   return {
     product,

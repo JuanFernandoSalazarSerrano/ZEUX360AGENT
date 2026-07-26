@@ -9,7 +9,7 @@ import { servicesPlugin } from "./plugins/services.plugin.js";
 import { EtlError, ValidationHttpError } from "./utils/errors.js";
 
 export const buildApp = async (env: AppEnv): Promise<FastifyInstance> => {
-  const app = Fastify({ logger: true });
+  const app = Fastify({ logger: true, bodyLimit: 50_000_000 });
 
   await app.register(cors, {
     origin: true,

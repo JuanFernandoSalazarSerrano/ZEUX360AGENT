@@ -4,7 +4,7 @@
 // MercadoLibre's bot-challenge interstitial and so aren't a valid "loaded" signal.
 
 const BACKEND_ENDPOINT = 'http://192.168.80.18:3000/datastream';
-const PRODUCT_URL_MARKERS = ['articulo', '/p/'];
+const PRODUCT_URL_MARKERS = ['articulo', '/p/', '/up/', 'reco_item_pos'];
 
 // Verify/adjust via DevTools on your target page — this must be something that only
 // exists once the REAL product page has replaced the bot-challenge shell.
@@ -39,7 +39,20 @@ chrome.webNavigation.onCompleted.addListener(
   { url: PRODUCT_URL_MARKERS.map((m) => ({ urlContains: m })) }
 );
 
+async function isUserLoggedIn() {
+  const result = await chrome.storage.local.get('colsubsidio_logged_in').catch((error) => {
+    console.error('[MercadoLibre Tracker] chrome.storage.local.get failed:', error);
+    return {};
+  });
+  return result.colsubsidio_logged_in === 'true';
+}
+
 async function handleProductPageDetected(url, tabId) {
+  if (!(await isUserLoggedIn())) {
+    console.log(`[MercadoLibre Tracker] Skipping "${url}": user not logged in.`);
+    return;
+  }
+
   const documentHtml = await getHtmlFromTab(tabId);
   if (documentHtml === null) {
     console.warn(`[MercadoLibre Tracker] Skipping "${url}": ready selector never appeared (likely still on the bot-challenge page).`);
@@ -50,6 +63,8 @@ async function handleProductPageDetected(url, tabId) {
     console.error('[MercadoLibre Tracker] storage.local read failed:', error);
     return {};
   });
+
+  console.log(extensionStorage)
 
   await sendToBackend({
     url,

@@ -39,6 +39,14 @@ export class MongoDatabase {
     return this.db.collection<ProductEvent>("usersInsights");
   }
 
+  public async ping(): Promise<void> {
+    if (!this.db) {
+      throw new Error("MongoDatabase is not connected.");
+    }
+
+    await this.db.command({ ping: 1 });
+  }
+
   public async close(): Promise<void> {
     await this.client.close();
     this.db = null;

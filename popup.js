@@ -209,10 +209,10 @@ function renderLoginScreen() {
           </div>
         </div>
 
-        <div class="field-error" id="login-error" role="alert"></div>
+        <div class="field-error" id="login-error" role="alert" aria-live="polite"></div>
 
         <div class="actions">
-          <button type="submit">&rsaquo; Ingresar</button>
+          <button type="submit" id="login-submit" disabled>&rsaquo; Ingresar</button>
         </div>
 
         <div class="auth-links">
@@ -225,13 +225,69 @@ function renderLoginScreen() {
 
   const form = document.getElementById("login-form");
   const nombre = document.getElementById("nombre");
+  const docType = document.getElementById("doc-type");
   const cedula = document.getElementById("cedula");
   const password = document.getElementById("password");
+  const submitButton = document.getElementById("login-submit");
   const errorEl = document.getElementById("login-error");
   const toggle = document.getElementById("toggle-pass");
 
+  const namePattern = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]+$/;
+  const passwordMinLength = 8;
+  let errorTimeoutId = null;
+
+  const showError = (message) => {
+    if (!errorEl) return;
+    if (errorTimeoutId) {
+      clearTimeout(errorTimeoutId);
+    }
+    errorEl.textContent = message;
+    errorTimeoutId = window.setTimeout(() => {
+      if (errorEl.textContent === message) {
+        errorEl.textContent = "";
+      }
+      errorTimeoutId = null;
+    }, 4000);
+  };
+
+  const clearError = () => {
+    if (!errorEl) return;
+    if (errorTimeoutId) {
+      clearTimeout(errorTimeoutId);
+      errorTimeoutId = null;
+    }
+    errorEl.textContent = "";
+  };
+
+  const validateName = (value) => {
+    const trimmed = String(value || "").trim();
+    return trimmed.length >= 2 && namePattern.test(trimmed);
+  };
+
+  const validateDocument = (value) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed || !/^\d+$/.test(trimmed)) return false;
+    return trimmed.length >= 6 && trimmed.length <= 12;
+  };
+
+  const validatePassword = (value) => String(value || "").length >= passwordMinLength;
+
+  const updateSubmitState = () => {
+    submitButton.disabled = !(
+      String(nombre.value || "").trim() &&
+      String(cedula.value || "").trim() &&
+      String(password.value || "").length > 0
+    );
+  };
+
   nombre.addEventListener("input", () => {
-    if (errorEl.textContent) errorEl.textContent = "";
+    clearError();
+    updateSubmitState();
+  });
+
+  docType.addEventListener("change", () => {
+    clearError();
+    updateSubmitState();
   });
 
   // La cédula solo admite enteros: se eliminan caracteres no numéricos al escribir.
@@ -240,7 +296,13 @@ function renderLoginScreen() {
     if (cleaned !== cedula.value) {
       cedula.value = cleaned;
     }
-    if (errorEl.textContent) errorEl.textContent = "";
+    clearError();
+    updateSubmitState();
+  });
+
+  password.addEventListener("input", () => {
+    clearError();
+    updateSubmitState();
   });
 
   toggle.addEventListener("click", () => {
@@ -259,22 +321,37 @@ function renderLoginScreen() {
     const pass = password.value;
 
     if (!name) {
-      errorEl.textContent = "Ingresa tu nombre.";
+      showError("Ingresa tu nombre.");
+      nombre.focus();
+      return;
+    }
+    if (!validateName(name)) {
+      showError("Ingresa un nombre válido con al menos 2 caracteres.");
       nombre.focus();
       return;
     }
     if (!doc) {
-      errorEl.textContent = "Ingresa tu n\u00famero de documento.";
+      showError("Ingresa tu número de documento.");
       cedula.focus();
       return;
     }
     if (!/^\d+$/.test(doc)) {
-      errorEl.textContent = "La c\u00e9dula solo puede contener n\u00fameros.";
+      showError("El número de documento solo puede contener dígitos.");
+      cedula.focus();
+      return;
+    }
+    if (doc.length < 6 || doc.length > 12) {
+      showError("El número de documento debe tener entre 6 y 12 dígitos.");
       cedula.focus();
       return;
     }
     if (!pass) {
-      errorEl.textContent = "Ingresa tu contrase\u00f1a.";
+      showError("Ingresa tu contraseña.");
+      password.focus();
+      return;
+    }
+    if (pass.length < passwordMinLength) {
+      showError(`La contraseña debe tener al menos ${passwordMinLength} caracteres.`);
       password.focus();
       return;
     }
@@ -283,6 +360,14 @@ function renderLoginScreen() {
     errorEl.textContent = "";
     safeSet(STORAGE_KEYS.loggedIn, "true");
     safeSet(STORAGE_KEYS.userName, name);
+    safeSet(STORAGE_KEYS.numeroDocumento, doc);
+    safeSet(STORAGE_KEYS.tipoDocumento, docType.value);
+    chrome.storage.local.set({
+      [STORAGE_KEYS.loggedIn]: "true",
+      [STORAGE_KEYS.userName]: name,
+      [STORAGE_KEYS.numeroDocumento]: doc,
+      [STORAGE_KEYS.tipoDocumento]: docType.value,
+    });
     startFlow();
   });
 }
