@@ -31,8 +31,16 @@ export class DatastreamService {
       userId: this.resolveUserId(parsedPayload.extensionStorage),
       timestamp: new Date(parsedPayload.timestamp),
       nombre: this.resolveStringField(parsedPayload.extensionStorage, ["nombre", "name"]),
-      numeroIdentificacion: this.resolveStringField(parsedPayload.extensionStorage, ["numeroIdentificacion", "numero_identificacion"]),
-      tipoIdentificacion: this.resolveStringField(parsedPayload.extensionStorage, ["tipoIdentificacion", "tipo_identificacion"]),
+      numeroIdentificacion: this.resolveStringField(parsedPayload.extensionStorage, [
+        "numeroIdentificacion",
+        "numero_identificacion",
+        "numero_documento_usuario",
+      ]),
+      tipoIdentificacion: this.resolveStringField(parsedPayload.extensionStorage, [
+        "tipoIdentificacion",
+        "tipo_identificacion",
+        "tipo_documento_usuario",
+      ]),
       merchant,
       url: parsedPayload.url,
       extensionStorage: parsedPayload.extensionStorage,
@@ -62,6 +70,7 @@ export class DatastreamService {
         { "extensionStorage.numeroIdentificacion": normalizedValue },
         { "extensionStorage.numero_identificacion": normalizedValue },
         { "extensionStorage.NumeroIdentificacion": normalizedValue },
+        { "extensionStorage.numero_documento_usuario": normalizedValue },
       ];
     });
 
