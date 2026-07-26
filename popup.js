@@ -1059,7 +1059,15 @@ async function drawImportantLines() {
       document.documentElement.appendChild(overlay);
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      const infoRepresentationDuration = 1100;
+      const calculateLineDuration = (lineIndex) => {
+        // First 8 lines use full 100% duration (1100ms)
+        if (lineIndex < 8) {
+          return 1100;
+        }
+        // After line 8, reduce by 15% every 5 lines
+        const bucketIndex = Math.floor((lineIndex - 8) / 5);
+        return Math.round(1100 * Math.pow(0.70, bucketIndex + 1));
+      };
       const startX = Math.max(0, window.innerWidth - 300);
       const startY = 10;
 
@@ -1182,7 +1190,8 @@ async function drawImportantLines() {
         document.head.appendChild(styleTag);
       }
 
-      for (const element of unique) {
+      for (let lineIndex = 0; lineIndex < unique.length; lineIndex += 1) {
+        const element = unique[lineIndex];
         const rect = element.getBoundingClientRect();
         const endX = Math.max(
           0,
@@ -1423,6 +1432,7 @@ async function drawImportantLines() {
         labelGroup.style.transformOrigin = `${midX}px ${midY}px`;
         labelGroup.style.transform = "scale(0.985)";
 
+        const lineDuration = calculateLineDuration(lineIndex);
         requestAnimationFrame(() => {
           line.style.opacity = "1";
           leadDot.style.opacity = "1";
@@ -1433,7 +1443,7 @@ async function drawImportantLines() {
 
           flowDots.forEach((flowDot, dotIndex) => {
             const delay = dotIndex * 120;
-            const duration = infoRepresentationDuration;
+            const duration = lineDuration;
             const baseRadius = Number(flowDot.getAttribute("r")) || 2;
             const startTime = performance.now() + delay;
 
@@ -1469,7 +1479,7 @@ async function drawImportantLines() {
           });
         });
 
-        await sleep(infoRepresentationDuration);
+        await sleep(lineDuration);
         line.style.opacity = "0";
         leadDot.style.opacity = "0";
         flowDots.forEach((flowDot) => flowDot.setAttribute("opacity", "0"));
