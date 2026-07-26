@@ -14,8 +14,6 @@ Cada respuesta del afiliado vuelve al grafo y mejora la siguiente recomendación
 
 **NEXO360 no solo ofrece crédito: construye una conversación continua entre Colsubsidio y cada afiliado.**
 
-<img width="2012" height="850" alt="image" src="https://github.com/user-attachments/assets/f2d77a81-7b61-4401-bb70-3cd0aedb715f" />
-
 ---
 
 ## 🚀 Instala la extensión en Chrome — ¡es muy sencillo!
