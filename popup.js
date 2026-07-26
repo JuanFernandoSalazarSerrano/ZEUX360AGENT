@@ -496,7 +496,7 @@ function renderCompleteScreen(product = MERCADOLIBRE_DEFAULT_PRODUCT) {
         <img class="product-thumb" src="${productImage}" alt="${productName}" />
         <div class="product-info">
           <div class="product-name">${productName}</div>
-          <div class="product-price">${productPrice}</div>
+          <div class="product-price">${productPrice} $</div>
           <span class="product-tag">${category}</span>
         </div>
       </div>
